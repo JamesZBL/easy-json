@@ -89,6 +89,10 @@ public class JsonBasic extends JsonItem {
     return content instanceof String;
   }
 
+  /**
+   * 以布尔值表示
+   */
+  @Override
   public boolean getBooleanValue() {
     if (typeofBoolean()) {
       return (Boolean) content;
@@ -97,30 +101,74 @@ public class JsonBasic extends JsonItem {
     }
   }
 
-  public Integer getIntegerValue() {
-    return typeOfNumber() ? (Integer) content : Integer.valueOf(content.toString());
+  /**
+   * 以 int 表示
+   */
+  @Override
+  public int getIntValue() {
+    return typeOfNumber() ? getNumberValue().intValue() : Integer.parseInt(getStringValue());
   }
 
-  public Short getShortValue() {
-    return typeOfNumber() ? (Short) content : Short.parseShort(content.toString());
+  /**
+   * 以 short 表示
+   */
+  @Override
+  public short getShortValue() {
+    return typeOfNumber() ? getNumberValue().shortValue() : Short.parseShort(getStringValue());
   }
 
-  public Long getLongValue() {
-    return typeOfNumber() ? (Long) content : Long.parseLong(content.toString());
+  /**
+   * 以 long 表示
+   */
+  @Override
+  public long getLongValue() {
+    return typeOfNumber() ? getNumberValue().longValue() : Long.parseLong(getStringValue());
   }
 
-  public Byte getByteValue() {
-    return typeOfNumber() ? (Byte) content : Byte.parseByte(content.toString());
+  /**
+   * 以 byte 表示
+   */
+  @Override
+  public byte getByteValue() {
+    return typeOfNumber() ? getNumberValue().byteValue() : Byte.parseByte(getStringValue());
   }
 
-  public Float getFloatValue() {
-    return typeOfNumber() ? (Float) content : Float.parseFloat(content.toString());
+  /**
+   * 以 float 表示
+   */
+  @Override
+  public float getFloatValue() {
+    return typeOfNumber() ? getNumberValue().floatValue() : Float.parseFloat(getStringValue());
   }
 
+  /**
+   * 以 double 表示
+   */
+  @Override
+  public double getDoubleValue() {
+    return typeOfNumber() ? getNumberValue().doubleValue() : Double.parseDouble(getStringValue());
+  }
+
+  /**
+   * 以 char 表示
+   */
+  @Override
+  public char getCharValue() {
+    return getStringValue().charAt(0);
+  }
+
+  /**
+   * 以 Number 表示
+   */
+  @Override
   public Number getNumberValue() {
     return content instanceof String ? new StringNumber((String) content) : (Number) content;
   }
 
+  /**
+   * 以字符串表示
+   */
+  @Override
   public String getStringValue() {
     if (typeofBoolean()) {
       return ((Boolean) content).toString();
@@ -151,5 +199,56 @@ public class JsonBasic extends JsonItem {
   @Override
   public int hashCode() {
     return content.hashCode();
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj) {
+      return true;
+    }
+
+    if (null != obj) {
+      if (getClass() != obj.getClass()) {
+        // 类型不同
+        return false;
+      } else {
+        // 类型相同
+        JsonBasic origin = (JsonBasic) obj;
+        if (typeOfNumber()) {
+          // 数值型
+          if (canParseToInt(this) && canParseToInt(origin)) {
+            // 可以无损转换为整数，则比较转换成长整型后的值
+            long thisLv = getNumberValue().longValue();
+            long oriLv = origin.getNumberValue().longValue();
+            return thisLv == oriLv;
+          } else if (origin.content instanceof Number) {
+            // 目标为数值型但不能无损转换成整数
+            double oriDv = origin.getDoubleValue();
+            double thisDv = getDoubleValue();
+            // 注意判断是否为 NaN (0.0d/0 所得的值)
+            return thisDv == oriDv || Double.isNaN(oriDv) && Double.isNaN(oriDv);
+          }
+        } else {
+          return content.equals(origin.content);
+        }
+      }
+    } else if (content == null) {
+      return true;
+    }
+    return false;
+  }
+
+  /**
+   * 判断数值类型能否直接或间接转换成整数
+   */
+  private static boolean canParseToInt(JsonBasic origin) {
+    if (origin.content instanceof Number) {
+      Number n = (Number) origin.content;
+      return n instanceof Integer ||
+              n instanceof Short ||
+              n instanceof Long ||
+              n instanceof Byte;
+    }
+    return false;
   }
 }

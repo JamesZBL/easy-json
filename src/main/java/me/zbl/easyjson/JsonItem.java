@@ -38,4 +38,44 @@ public abstract class JsonItem {
   public boolean typeOfBasic() {
     return this instanceof JsonBasic;
   }
+
+  public boolean getBooleanValue() {
+    throw new UnsupportedOperationException();
+  }
+
+  public byte getByteValue() {
+    throw new UnsupportedOperationException();
+  }
+
+  public int getIntValue() {
+    throw new UnsupportedOperationException();
+  }
+
+  public short getShortValue() {
+    throw new UnsupportedOperationException();
+  }
+
+  public long getLongValue() {
+    throw new UnsupportedOperationException();
+  }
+
+  public float getFloatValue() {
+    throw new UnsupportedOperationException();
+  }
+
+  public double getDoubleValue() {
+    throw new UnsupportedOperationException();
+  }
+
+  public char getCharValue() {
+    throw new UnsupportedOperationException();
+  }
+
+  public String getStringValue() {
+    throw new UnsupportedOperationException();
+  }
+
+  public Number getNumberValue() {
+    throw new UnsupportedOperationException();
+  }
 }

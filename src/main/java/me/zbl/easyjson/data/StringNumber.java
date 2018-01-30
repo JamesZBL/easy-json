@@ -24,7 +24,7 @@ package me.zbl.easyjson.data;
  */
 public class StringNumber extends Number {
 
-  private String content;
+  private final String content;
 
   public StringNumber(String content) {
     this.content = content;
@@ -37,7 +37,11 @@ public class StringNumber extends Number {
 
   @Override
   public int intValue() {
-    return Integer.parseInt(content);
+    try {
+      return Integer.parseInt(content);
+    } catch (NumberFormatException e) {
+      return (int) Long.parseLong(content);
+    }
   }
 
   @Override
@@ -53,5 +57,21 @@ public class StringNumber extends Number {
   @Override
   public double doubleValue() {
     return Double.parseDouble(content);
+  }
+
+  @Override
+  public int hashCode() {
+    return content.hashCode();
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (obj == this) {
+      return true;
+    } else if (obj instanceof StringNumber) {
+      String originContent = ((StringNumber) obj).content;
+      return content == originContent || content.equals(originContent);
+    }
+    return false;
   }
 }
