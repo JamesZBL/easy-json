@@ -53,11 +53,35 @@ public class JsonBasic extends JsonItem {
           Character.class
   };
 
+  public JsonBasic(Object origin) {
+    setContent(origin);
+  }
+
+  public JsonBasic(Number origin) {
+    setContent(origin);
+  }
+
+  public JsonBasic(Character origin) {
+    setContent(origin);
+  }
+
+  public JsonBasic(String origin) {
+    setContent(origin);
+  }
+
+  public JsonBasic(Boolean origin) {
+    setContent(origin);
+  }
+
   @Override
   public JsonItem itemClone() {
     return this;
   }
 
+  /**
+   * 赋值只接受基本数据类型、字符串（字符）以及基本数据类型的包装类型
+   * Json 中单个字符同样作为字符串处理，所有为了方便转换，将单个字符预先转换为字符串类型
+   */
   public void setContent(Object origin) {
     if (origin instanceof Character) {
       content = String.valueOf(((Character) origin).charValue());
@@ -90,7 +114,7 @@ public class JsonBasic extends JsonItem {
   }
 
   /**
-   * 以布尔值表示
+   * 以 boolean 表示
    */
   @Override
   public boolean getBooleanValue() {
@@ -196,6 +220,21 @@ public class JsonBasic extends JsonItem {
     return origin instanceof String;
   }
 
+
+  /**
+   * 判断数值类型能否不丢失精度地转换成整数
+   */
+  private static boolean canParseToInt(JsonBasic origin) {
+    if (origin.content instanceof Number) {
+      Number n = (Number) origin.content;
+      return n instanceof Integer ||
+              n instanceof Short ||
+              n instanceof Long ||
+              n instanceof Byte;
+    }
+    return false;
+  }
+
   @Override
   public int hashCode() {
     return content.hashCode();
@@ -217,15 +256,15 @@ public class JsonBasic extends JsonItem {
         if (typeOfNumber()) {
           // 数值型
           if (canParseToInt(this) && canParseToInt(origin)) {
-            // 可以无损转换为整数，则比较转换成长整型后的值
+            // 如果可以不丢失精度地转换为整数，则比较转换成长整型后的值（保证最大精度）
             long thisLv = getNumberValue().longValue();
             long oriLv = origin.getNumberValue().longValue();
             return thisLv == oriLv;
           } else if (origin.content instanceof Number) {
-            // 目标为数值型但不能无损转换成整数
+            // 目标为数值型不能无损转换成整数，则比较转换成双精度后的值
             double oriDv = origin.getDoubleValue();
             double thisDv = getDoubleValue();
-            // 注意判断是否为 NaN (0.0d/0 所得的值)
+            // 注意判断是否为 NaN (0.0d/0 所得的值)，在 Json 中表示为 "NaN"
             return thisDv == oriDv || Double.isNaN(oriDv) && Double.isNaN(oriDv);
           }
         } else {
@@ -234,20 +273,6 @@ public class JsonBasic extends JsonItem {
       }
     } else if (content == null) {
       return true;
-    }
-    return false;
-  }
-
-  /**
-   * 判断数值类型能否直接或间接转换成整数
-   */
-  private static boolean canParseToInt(JsonBasic origin) {
-    if (origin.content instanceof Number) {
-      Number n = (Number) origin.content;
-      return n instanceof Integer ||
-              n instanceof Short ||
-              n instanceof Long ||
-              n instanceof Byte;
     }
     return false;
   }
