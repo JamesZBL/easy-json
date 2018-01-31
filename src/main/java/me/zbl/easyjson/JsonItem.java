@@ -35,8 +35,16 @@ public abstract class JsonItem {
   /**
    * 判断是否为 Json 基本数据类型
    */
-  public boolean typeOfBasic() {
+  public boolean typeOfJsonBasic() {
     return this instanceof JsonBasic;
+  }
+
+  public boolean typeOfJsonNull() {
+    return this instanceof JsonNull;
+  }
+
+  public boolean typeOfJsonArray() {
+    return this instanceof JsonArray;
   }
 
   public boolean getBooleanValue() {
