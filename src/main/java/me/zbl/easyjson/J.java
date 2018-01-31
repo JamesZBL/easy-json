@@ -26,11 +26,11 @@ import java.util.List;
  * @author JamesZBL
  * @date 2018-01-31
  */
-public final class JsonArray extends JsonItem implements Iterable<JsonItem> {
+public final class J extends JsonItem implements Iterable<JsonItem> {
 
   private final List<JsonItem> content;
 
-  public JsonArray() {
+  public J() {
     content = new ArrayList<JsonItem>();
   }
 
@@ -120,8 +120,8 @@ public final class JsonArray extends JsonItem implements Iterable<JsonItem> {
     if (this == obj) {
       return true;
     } else {
-      if (obj instanceof JsonArray) {
-        if (((JsonArray) obj).content.equals(content)) {
+      if (obj instanceof J) {
+        if (((J) obj).content.equals(content)) {
           return true;
         }
       }
