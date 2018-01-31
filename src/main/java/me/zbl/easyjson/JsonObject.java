@@ -33,6 +33,9 @@ public final class JsonObject extends JsonItem {
   public JsonObject() {
   }
 
+  /**
+   * 添加项
+   */
   public void addItem(String name, JsonItem value) {
     if (null != value) {
       content.put(name, value);
@@ -41,12 +44,61 @@ public final class JsonObject extends JsonItem {
     }
   }
 
+  /**
+   * 移除项
+   */
   public void removeItem(String key) {
     content.remove(key);
   }
 
+  /**
+   * 判断是否包含键
+   */
   public boolean containsItem(String key) {
     return content.containsKey(key);
+  }
+
+  /**
+   * 添加属性
+   * 此处属性的值为 Json 基本数据类型
+   */
+  public void addProperty(String key, String value) {
+    addItem(key, newJsonItem(value));
+  }
+
+  /**
+   * 添加属性
+   * 此处属性的值为 Json 基本数据类型
+   */
+  public void addProperty(String key, Number value) {
+    addItem(key, newJsonItem(value));
+  }
+
+  /**
+   * 添加属性
+   * 此处属性的值为 Json 基本数据类型
+   */
+  public void addProperty(String key, Boolean value) {
+    addItem(key, newJsonItem(value));
+  }
+
+  /**
+   * 添加属性
+   * 此处属性的值为 Json 基本数据类型
+   */
+  public void addProperty(String key, Character value) {
+    addItem(key, newJsonItem(value));
+  }
+
+  /**
+   * 创建 Json 数据项
+   */
+  private JsonItem newJsonItem(Object obj) {
+    if (null == obj) {
+      return JsonNull.getINSTANCE();
+    } else {
+      return new JsonBasic(obj);
+    }
   }
 
   @Override

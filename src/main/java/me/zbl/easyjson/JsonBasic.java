@@ -85,7 +85,7 @@ public final class JsonBasic extends JsonItem {
   public void setContent(Object origin) {
     if (origin instanceof Character) {
       content = String.valueOf(((Character) origin).charValue());
-    } else if (isBasicOrString(origin)) {
+    } else if (isBasicDataTypeOrWrapperOrString(origin)) {
       this.content = origin;
     } else {
       throw new IllegalArgumentException();
@@ -195,7 +195,7 @@ public final class JsonBasic extends JsonItem {
   @Override
   public String getStringValue() {
     if (typeofBoolean()) {
-      return ((Boolean) content).toString();
+      return String.valueOf(content);
     } else if (typeOfNumber()) {
       return getNumberValue().toString();
     }
@@ -203,9 +203,9 @@ public final class JsonBasic extends JsonItem {
   }
 
   /**
-   * 判断传递进来的对象或值是否为基本类型或字符串类型
+   * 判断传递进来的对象或值是否为基本数据类型（包装类型）或字符串类型
    */
-  private static boolean isBasicOrString(Object origin) {
+  private static boolean isBasicDataTypeOrWrapperOrString(Object origin) {
     Class<?> originClazz = origin.getClass();
     for (Class<?> c : BASIC_DATA_TYPES) {
       if (c.isAssignableFrom(originClazz)) {
