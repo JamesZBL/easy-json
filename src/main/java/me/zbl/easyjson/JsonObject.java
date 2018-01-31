@@ -52,6 +52,13 @@ public final class JsonObject extends JsonItem {
   }
 
   /**
+   * 根据键获取项
+   */
+  public JsonItem getItem(String key) {
+    return content.get(key);
+  }
+
+  /**
    * 判断是否包含键
    */
   public boolean containsItem(String key) {
