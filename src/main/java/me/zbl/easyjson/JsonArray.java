@@ -64,6 +64,13 @@ public final class JsonArray extends JsonItem implements Iterable<JsonItem> {
   }
 
   /**
+   * 数组长度
+   */
+  public int length() {
+    return content.size();
+  }
+
+  /**
    * 添加数据
    * 此处属性的值为 Json 基本数据类型
    */
