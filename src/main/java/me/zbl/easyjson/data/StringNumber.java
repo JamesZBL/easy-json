@@ -23,7 +23,7 @@ package me.zbl.easyjson.data;
  * @author JamesZBL
  * @date 2018-01-30
  */
-public class StringNumber extends Number {
+public final class StringNumber extends Number {
 
   private final String content;
 
