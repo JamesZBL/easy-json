@@ -18,6 +18,7 @@ package me.zbl.easyjson.data;
 
 /**
  * 以字符串的方式保存数值的类型
+ * 方便根据具体需要进行转换
  *
  * @author JamesZBL
  * @date 2018-01-30
