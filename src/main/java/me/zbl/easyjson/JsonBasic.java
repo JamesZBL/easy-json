@@ -27,7 +27,7 @@ import me.zbl.easyjson.data.StringNumber;
  * @author JamesZBL
  * @date 2018-1-30
  */
-public class JsonBasic extends JsonItem {
+public final class JsonBasic extends JsonItem {
 
   private Object content;
 
