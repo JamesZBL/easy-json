@@ -14,22 +14,46 @@
  * limitations under the License.
  *
  */
-package me.zbl.easyjson.annotations;
-
-import java.lang.annotation.*;
+package me.zbl.easyjson.io.lexical;
 
 /**
- * 是否对域进行序列化/反序列化
+ * Json 中的词法及作用域的定义
  *
  * @author JamesZBL
- * @date 2018-02-03
+ * @date 2018-02-04
  */
-@Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.FIELD)
-public @interface EasyJsonProcess {
+public enum JsonLexical {
 
   /**
-   * 是否跳过当前域
+   * 空的 Json
    */
-  public boolean skip() default false;
+  DOCUMENT_WITHOUT_ANY_ELEMENTS,
+  /**
+   * 非空的 Json
+   */
+  DOCUMENT_WITH_ELEMENTS,
+  /**
+   * 空的 Json 数组
+   */
+  ARRAY_WITHOUT_ELEMENT,
+  /**
+   * 非空的 Json 数组
+   */
+  ARRAY_WITH_ELEMENTS,
+  /**
+   * 空的 Json 对象
+   */
+  OBJECT_WITHOUT_ATTRIBUT,
+  /**
+   * 非空的 Json 对象
+   */
+  OBJECT_WITH_ATRRIBUTES,
+  /**
+   * 作为键值对中的 “值” 的对象
+   */
+  OBJECT_AS_VALUE,
+  /**
+   * 读/写完毕
+   */
+  DOCUMENT_ENDED
 }
