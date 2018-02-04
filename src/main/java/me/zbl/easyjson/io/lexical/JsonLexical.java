@@ -49,9 +49,9 @@ public enum JsonLexical {
    */
   OBJECT_WITH_ATRRIBUTES,
   /**
-   * 作为键值对中的 “值” 的对象
+   * 作为键值对中的 "键"
    */
-  OBJECT_AS_VALUE,
+  NAME_OF_PAIR,
   /**
    * 读/写完毕
    */

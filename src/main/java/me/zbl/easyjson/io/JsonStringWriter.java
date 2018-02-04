@@ -34,9 +34,13 @@ public class JsonStringWriter implements Closeable, Flushable {
 
   private Writer mWriter;
   /**
-   * 键值对之间的分隔符，默认冒号
+   * 键值对之间的分隔符，默认为冒号
    */
   private String delimiter = ":";
+  private String signArrayStart = "[";
+  private String signArrayEnd = "]";
+  private String signObjectStart = "{";
+  private String signObjectEnd = "}";
   /**
    * 键值对中的“键”
    */
@@ -53,8 +57,9 @@ public class JsonStringWriter implements Closeable, Flushable {
   public JsonStringWriter(Writer w) {
     StatusCheck.checkIfNull(w);
     this.mWriter = w;
+    // 置当前状态为初始化状态
+    stackPush(JsonLexical.DOCUMENT_WITHOUT_ANY_ELEMENTS);
   }
-
 
 
   /**
@@ -90,6 +95,182 @@ public class JsonStringWriter implements Closeable, Flushable {
    */
   private void stackKick(JsonLexical lexical) {
     contextStack[contextStackSize - 1] = lexical;
+  }
+
+  /**
+   * 开辟新的作用域（新的对象或新的数组）
+   *
+   * @param lexical 词法（表示一个作用域的开始）
+   * @param sign    <pre>作用域开始位置的符号：数组为 " [ "，对象为 " { "</pre>
+   *
+   * @throws IOException
+   */
+  private JsonStringWriter newScope(JsonLexical lexical, String sign) throws IOException {
+    beforeWritingValue();
+    stackPush(lexical);
+    mWriter.write(sign);
+    return this;
+  }
+
+  /**
+   * 结束作用域
+   *
+   * @param lexical 词法（表示一个作用域的开始）
+   * @param sign    <pre>作用域开始位置的符号：数组为 " [ "，对象为 " { "</pre>
+   *
+   * @throws IOException
+   */
+  private JsonStringWriter finishScope(String sign, JsonLexical... lexical) throws IOException {
+    JsonLexical last = stackLast();
+    int confirm = 0;
+    for (JsonLexical expected : lexical) {
+      if (last.equals(expected)) {
+        confirm++;
+      }
+    }
+    if (confirm == 0) {
+      throw new IllegalStateException("写顺序不正确！");
+    }
+    contextStackSize--;
+    mWriter.write(sign);
+    return this;
+  }
+
+  /**
+   * 写键值对的“键”名之前的处理
+   */
+  private void beforeWritingName() throws IOException {
+    JsonLexical last = stackLast();
+    if (last == JsonLexical.OBJECT_WITH_ATRRIBUTES) {
+      // 对象不为空，表明在此之前写过至少一个键值对
+      mWriter.write(",");
+    }
+    stackKick(JsonLexical.NAME_OF_PAIR);
+  }
+
+  /**
+   * 写键值对的“值”之前的处理
+   */
+  private void beforeWritingValue() throws IOException {
+    JsonLexical last = stackLast();
+    switch (last) {
+      case DOCUMENT_WITHOUT_ANY_ELEMENTS:
+        // 顶级元素
+        stackKick(JsonLexical.DOCUMENT_WITH_ELEMENTS);
+        break;
+      case DOCUMENT_WITH_ELEMENTS:
+        // 只允许存在一个顶级元素，表示多个元素应使用数组
+        throw new IllegalArgumentException("存在多个顶级元素！");
+      case ARRAY_WITHOUT_ELEMENT:
+        // 数组中的第一个元素
+        stackKick(JsonLexical.ARRAY_WITH_ELEMENTS);
+        break;
+      case ARRAY_WITH_ELEMENTS:
+        // 数组中已经有至少一个元素
+        mWriter.write(",");
+        break;
+      case NAME_OF_PAIR:
+        // 刚写完“键”，现在写“值”
+        mWriter.write(delimiter);
+        break;
+      default:
+    }
+  }
+
+  private void writeName() throws IOException {
+    if (null != itemName) {
+      beforeWritingName();
+      writeString(itemName);
+      this.itemName = null;
+    }
+  }
+
+  /**
+   * 写键
+   *
+   * @param name 键
+   */
+  public JsonStringWriter name(String name) {
+    this.itemName = name;
+    return this;
+  }
+
+  /**
+   * 写值
+   *
+   * @param value 字符串值
+   *
+   * @throws IOException
+   */
+  public JsonStringWriter value(String value) throws IOException {
+    writeName();
+    beforeWritingValue();
+    if (null == value) {
+      writeNull();
+    } else {
+      writeString(value);
+    }
+    return this;
+  }
+
+  /**
+   * 开始写数组
+   *
+   * @throws IOException
+   */
+  public JsonStringWriter newJsonArray() throws IOException {
+    writeName();
+    newScope(JsonLexical.ARRAY_WITHOUT_ELEMENT, signArrayStart);
+    return this;
+  }
+
+  /**
+   * 写数组完成
+   *
+   * @throws IOException
+   */
+  public JsonStringWriter finishJsonArray() throws IOException {
+    finishScope(signArrayEnd, JsonLexical.ARRAY_WITHOUT_ELEMENT, JsonLexical.ARRAY_WITH_ELEMENTS);
+    return this;
+  }
+
+  /**
+   * 开始写对象
+   *
+   * @throws IOException
+   */
+  public JsonStringWriter newJsonObject() throws IOException {
+    writeName();
+    newScope(JsonLexical.OBJECT_WITHOUT_ATTRIBUT, signObjectStart);
+    return this;
+  }
+
+  /**
+   * 写对象完成
+   *
+   * @throws IOException
+   */
+  public JsonStringWriter finishJsonObject() throws IOException {
+    finishScope(signObjectEnd, JsonLexical.OBJECT_WITHOUT_ATTRIBUT, JsonLexical.OBJECT_WITH_ATRRIBUTES);
+    return this;
+  }
+
+  /**
+   * 写字符串
+   * 形式为："name"（带有双引号）
+   *
+   * @param s 字符串
+   *
+   * @throws IOException
+   */
+  private void writeString(String s) throws IOException {
+    mWriter.write("\"");
+    mWriter.write(s);
+    mWriter.write("\"");
+  }
+
+  private void writeNull() throws IOException {
+    mWriter.write("null");
   }
 
   @Override
