@@ -34,9 +34,13 @@ public class JsonStringWriter implements Closeable, Flushable {
 
   private Writer mWriter;
   /**
+   * 数组元素或对象属性之间的分隔符，默认为逗号
+   */
+  private String delimiterArrayOrAtrribute = ",";
+  /**
    * 键值对之间的分隔符，默认为冒号
    */
-  private String delimiter = ":";
+  private String delimiterNameValuePair = ":";
   private String signArrayStart = "[";
   private String signArrayEnd = "]";
   private String signObjectStart = "{";
@@ -141,9 +145,9 @@ public class JsonStringWriter implements Closeable, Flushable {
    */
   private void beforeWritingName() throws IOException {
     JsonLexical last = stackLast();
-    if (last == JsonLexical.OBJECT_WITH_ATRRIBUTES) {
+    if (last == JsonLexical.OBJECT_WITH_ATTRIBUTES) {
       // 对象不为空，表明在此之前写过至少一个键值对
-      mWriter.write(",");
+      mWriter.write(delimiterArrayOrAtrribute);
     }
     stackKick(JsonLexical.NAME_OF_PAIR);
   }
@@ -167,11 +171,13 @@ public class JsonStringWriter implements Closeable, Flushable {
         break;
       case ARRAY_WITH_ELEMENTS:
         // 数组中已经有至少一个元素
-        mWriter.write(",");
+        mWriter.write(delimiterArrayOrAtrribute);
         break;
       case NAME_OF_PAIR:
         // 刚写完“键”，现在写“值”
-        mWriter.write(delimiter);
+        mWriter.write(delimiterNameValuePair);
+        // 将状态置为“非空对象”
+        stackKick(JsonLexical.OBJECT_WITH_ATTRIBUTES);
         break;
       default:
     }
@@ -214,6 +220,42 @@ public class JsonStringWriter implements Closeable, Flushable {
   }
 
   /**
+   * 写值
+   *
+   * @param value 数值型值
+   *
+   * @throws IOException
+   */
+  public JsonStringWriter value(Number value) throws IOException {
+    writeName();
+    beforeWritingValue();
+    if (null == value) {
+      writeNull();
+    } else {
+      mWriter.append(value.toString());
+    }
+    return this;
+  }
+
+  /**
+   * 写值
+   *
+   * @param value 布尔型值
+   *
+   * @throws IOException
+   */
+  public JsonStringWriter value(Boolean value) throws IOException {
+    writeName();
+    beforeWritingValue();
+    if (null == value) {
+      writeNull();
+    } else {
+      mWriter.write(value ? "true" : "false");
+    }
+    return this;
+  }
+
+  /**
    * 开始写数组
    *
    * @throws IOException
@@ -241,7 +283,7 @@ public class JsonStringWriter implements Closeable, Flushable {
    */
   public JsonStringWriter newJsonObject() throws IOException {
     writeName();
-    newScope(JsonLexical.OBJECT_WITHOUT_ATTRIBUT, signObjectStart);
+    newScope(JsonLexical.OBJECT_WITHOUT_ATTRIBUTE, signObjectStart);
     return this;
   }
 
@@ -251,7 +293,7 @@ public class JsonStringWriter implements Closeable, Flushable {
    * @throws IOException
    */
   public JsonStringWriter finishJsonObject() throws IOException {
-    finishScope(signObjectEnd, JsonLexical.OBJECT_WITHOUT_ATTRIBUT, JsonLexical.OBJECT_WITH_ATRRIBUTES);
+    finishScope(signObjectEnd, JsonLexical.OBJECT_WITHOUT_ATTRIBUTE, JsonLexical.OBJECT_WITH_ATTRIBUTES);
     return this;
   }
 

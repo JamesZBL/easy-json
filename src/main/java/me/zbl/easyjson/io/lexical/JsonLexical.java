@@ -43,11 +43,11 @@ public enum JsonLexical {
   /**
    * 空的 Json 对象
    */
-  OBJECT_WITHOUT_ATTRIBUT,
+  OBJECT_WITHOUT_ATTRIBUTE,
   /**
    * 非空的 Json 对象
    */
-  OBJECT_WITH_ATRRIBUTES,
+  OBJECT_WITH_ATTRIBUTES,
   /**
    * 作为键值对中的 "键"
    */
