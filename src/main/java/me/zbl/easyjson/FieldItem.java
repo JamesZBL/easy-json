@@ -16,7 +16,7 @@
  */
 package me.zbl.easyjson;
 
-import me.zbl.easyjson.internal.StatusCheck;
+import me.zbl.easyjson.validation.StatusCheck;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Type;

@@ -14,7 +14,7 @@
  * limitations under the License.
  *
  */
-package me.zbl.easyjson.internal;
+package me.zbl.easyjson.validation;
 
 /**
  * 状态检查

@@ -16,7 +16,8 @@
  */
 package me.zbl.easyjson.io;
 
-import me.zbl.easyjson.internal.StatusCheck;
+import me.zbl.easyjson.exceptions.JsonIOException;
+import me.zbl.easyjson.validation.StatusCheck;
 import me.zbl.easyjson.io.lexical.JsonLexical;
 
 import java.io.Closeable;
@@ -256,6 +257,24 @@ public class JsonStringWriter implements Closeable, Flushable {
   }
 
   /**
+   * 写值
+   *
+   * @param value 字符型值
+   *
+   * @throws IOException
+   */
+  public JsonStringWriter value(Character value) throws IOException {
+    writeName();
+    beforeWritingValue();
+    if (null == value) {
+      writeNull();
+    } else {
+      writeString(String.valueOf(value));
+    }
+    return this;
+  }
+
+  /**
    * 开始写数组
    *
    * @throws IOException
@@ -315,9 +334,19 @@ public class JsonStringWriter implements Closeable, Flushable {
     mWriter.write("null");
   }
 
+  private void emptyStack() {
+    contextStackSize = 0;
+  }
+
   @Override
   public void close() throws IOException {
-
+    mWriter.close();
+    boolean multiLeft = contextStackSize > 1;
+    boolean notEmpty = contextStackSize == 1 && contextStack[0] != JsonLexical.DOCUMENT_WITHOUT_ANY_ELEMENTS;
+    if (multiLeft || notEmpty) {
+      throw new JsonIOException("转换过程意外被中止！");
+    }
+    emptyStack();
   }
 
   @Override
